@@ -83,6 +83,16 @@
             text-align: center;
         }
 
+	    .thumbnail .movie-number {
+            position: absolute;
+            top: 5px;
+            left: 1px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 2px 5px;
+            font-size: 12px;
+            border-radius: 3px;
+        }
         .thumbnail .download-link {
             margin-top: 10px;
             font-size: 17px;
@@ -259,7 +269,8 @@
             div.onclick = () => playVideo(thumbnail.url, thumbnail.title);
             const viewCount = getViewCount(thumbnail.url);
             div.innerHTML = `
-
+<span class="movie-number">Movie ${thumbnailsData.length - (start + index)}</span>
+               
                 <img src="${thumbnail.img}" alt="${thumbnail.title}">
                 <p>${thumbnail.title}</p>
         
