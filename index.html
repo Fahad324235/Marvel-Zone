@@ -240,11 +240,13 @@
 <br>
 <<iframe data-aa='2322695' src='https://ad.a-ads.com/2322695?size=728x90' style='width:350px; height:90px; border:0px; padding:0; overflow:hidden; background-color: transparent;'></iframe>
     
-<!-- IFrame Modal Container -->
-<div id="iframe-container">
-    <span class="close-button" onclick="closeIFrame()">×</span>
-    <iframe src=""></iframe>
-</div>
+<!-- Overlay -->
+ <div id="overlay" class="overlay">
+ <div class="overlay-content">
+ <iframe id="overlayIframe" src="" frameborder="0" allowfullscreen></iframe>
+ <button class="close-btn" onclick="closeOverlay()">Close</button>
+ </div>
+ </div>
 
 <script>
    const thumbnailsData = [
