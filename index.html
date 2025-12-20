@@ -5,228 +5,211 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marvel Zone</title>
     <style>
+        :root {
+            --primary-color: #e62429; 
+            --bg-color: #0f171e;
+            --card-bg: #1a242f;
+            --text-main: #ffffff;
+            --accent-color: #00d2ff;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #2c3e50;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background: radial-gradient(circle at top, #1e2a38 0%, #0f171e 100%);
         }
+
+        /* --- Header & Video Player --- */
         .video-player {
             text-align: center;
-            margin: 20px;
-            padding: 10px;
-            border: 2px solid #333;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
             z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .video-container {
+            position: relative;
+            max-width: 750px;
+            margin: 0 auto;
+            border-radius: 1px;
             overflow: hidden;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(230, 36, 41, 0.4);
+            background: #000;
+            aspect-ratio: 16 / 9; /* پلیئر کا سائز فکس رکھنے کے لیے */
         }
-        .video-player iframe {
+
+        /* پلیئر اسٹائلنگ */
+        #mainPlayer, #directVideoPlayer {
             width: 100%;
-            max-width: 640px;
-            height: 360px;
+            height: 100%;
             border: none;
-            background-color: #000;
+            display: none; /* شروع میں چھپا ہوا */
         }
+
+        .video-title {
+            margin-top: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            text-transform: uppercase;
+        }
+
+        /* --- Thumbnail Grid --- */
+        .thumbnails {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .thumbnail {
+            background: var(--card-bg);
+            border-radius: 1px;
+            overflow: hidden;
+            transition: 0.3s;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+
+        .thumbnail:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-color);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+
+        .thumbnail-info {
+            padding: 12px;
+            text-align: center;
+        }
+
+        .movie-number {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 3px;
+            z-index: 2;
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 18px;
+            background: linear-gradient(45deg, #e62429, #ff5f6d);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .pagination button {
+            padding: 10px 20px;
+            background: var(--card-bg);
+            color: white;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled { opacity: 0.3; }
+
+        /* --- Overlay (Ad) --- */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .overlay-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #000;
+        }
+
+        .timer-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            font-family: sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 1px;
+            z-index: 2001;
+            box-shadow: 0 0 20px rgba(230, 36, 41, 0.6);
+        }
+
         .loading {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            border: 4px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 4px solid #3498db;
             width: 30px;
             height: 30px;
-            animation: spin 2s linear infinite;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
             display: none;
         }
-        @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        .video-title {
-            margin-top: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
-        .thumbnails {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 20px;
-        }
-        .thumbnail {
-            margin: 10px;
-            cursor: pointer;
-            text-align: center;
-            width: 400px;
-            background-color: #1abc9c;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-            position: relative;
-        }
-        .thumbnail:hover {
-            transform: scale(1.05);
-        }
-        .thumbnail img {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-        }
-        .thumbnail p {
-            margin: 5px 0 0;
-            text-align: center;
-        }
 
-        .thumbnail .movie-number {
-            position: absolute;
-            top: 5px;
-            left: 1px;
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            padding: 2px 5px;
-            font-size: 12px;
-            border-radius: 3px;
-        }
-        .thumbnail .download-link {
-            margin-top: 10px;
-            font-size: 17px;
-            text-align: center;
-            border-top: 4px solid #333;
-            padding-top: 5px;
-        }
-        .download-link a {
-            color: #FFFF00;
-            text-decoration: none;
-        }
-        .ad-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-            height: 90px;
-            width: 728px;
-            background-color: #ccc;
-            color: #333;
-            font-size: 24px;
-            text-align: center;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .pagination button {
-            margin: 0 5px;
-            padding: 10px 20px;
-            background-color: #333;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        .pagination button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        @media (max-width: 768px) {
-            .video-player iframe {
-                height: 200px;
-            }
-            .thumbnail {
-                width: 320px;
-            }
-            .ad-container {
-                width: 100%;
-                height: auto;
-            }
-        }
-        @media (max-width: 480px) {
-            .video-player iframe {
-                height: 180px;
-            }
-            .thumbnail {
-                width: 240px;
-            }
-            .thumbnail img {
-                height: auto;
-            }
-        }
-        
-         /* Overlay styling */
-  .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1002;
-  }
-  
-  .overlay-content {
-  background: #fff;
-  padding: 1px;
-  border-radius: 1px;
-  text-align: center;
-  position: relative;
-  width: 90%;
-  height: 90%;
-  }
-  
-  .overlay-content iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  }
-  
-  .close-btn {
-  display: none; /* Initially hide the button */
-  margin: 1px auto 0;
-  padding: 15px;
-  background: #f00;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  position: absolute;
-  bottom: 600px; /* Adjust position as needed */
-  left: 60%;
-  transform: translateX(-50%);
-  border-radius: 2%; /* Make the button round */
-  width: 160px; /* Adjust width */
-  height: 50px; /* Adjust height */
-  text-align: center;
-  line-height: 30px; /* Center text vertically */
-  animation: showButton 0s forwards;
-  }
-  
-  .close-btn::before {
-  content: 'X'; /* Add 'X' text inside the button */
-  font-size: 24px;
-  }
-  
-  @keyframes showButton {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-            }
-        
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
     </style>
 </head>
 <body>
 
 <div class="video-player">
-    <div id="loading" class="loading"></div>
-    <iframe id="mainPlayer" src="" allow="autoplay" frameborder="0" allowfullscreen></iframe>
-    <div id="videoTitle" class="video-title"></div>
+    <div class="video-container">
+        <div id="loading" class="loading"></div>
+        
+        <iframe id="mainPlayer" src="" allow="autoplay" allowfullscreen></iframe>
+        
+        <video id="directVideoPlayer" controls controlsList="nodownload">
+            <source id="videoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div id="videoTitle" class="video-title">Select A Movie</div>
 </div>
-
 
 <div class="thumbnails" id="thumbnailsContainer"></div>
 
@@ -234,92 +217,78 @@
     <button id="prevPage" onclick="changePage(-1)" disabled>Previous</button>
     <button id="nextPage" onclick="changePage(1)">Next</button>
 </div>
-<br>
 
-<h3 style="text-align: center;"><a href="https://www.highratecpm.com/uz50mzu3f?key=efec633d14ae4a27a4a0aa1aa41c9c7e" target="_blank"><span style="color: white;">Download All Movies</span></a></h3>
-<br>
-<<iframe data-aa='2322695' src='https://ad.a-ads.com/2322695?size=728x90' style='width:350px; height:90px; border:0px; padding:0; overflow:hidden; background-color: transparent;'></iframe>
-    
-<!-- Overlay -->
- <div id="overlay" class="overlay">
- <div class="overlay-content">
- <iframe id="overlayIframe" src="" frameborder="0" allowfullscreen></iframe>
- <button class="close-btn" onclick="closeOverlay()">Close</button>
- </div>
- </div>
+<center style="margin-bottom: 20px;">
+    <iframe data-aa='2322695' src='https://ad.a-ads.com/2322695?size=728x90' style='width:350px; height:90px; border:0px; padding:0; overflow:hidden; background-color: transparent;'></iframe>
+</center>
+
+<div id="overlay" class="overlay">
+    <div class="overlay-content">
+        <div id="timer" class="timer-display">20</div>
+        <iframe id="overlayIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+</div>
 
 <script>
+    const adLinks = [
+        "https://www.effectivegatecpm.com/uck9x0wk6?key=11fca88e86f0d00b67543ac7a783e47f",
+        "https://www.effectivegatecpm.com/zq5rzngg?key=a6fd58330a330c83ef94c1f7b6534856",
+        "https://www.effectivegatecpm.com/dqm7ya0myx?key=976aa4962ea641f87639dfc784b35969",
+        "https://www.effectivegatecpm.com/ht895npk?key=1dfeb60a3b20c38bc592436e3ccf9a82",
+        "https://www.effectivegatecpm.com/b7gn1rctv?key=a6df49ee2755a88078fad4af6ebd06bf",
+        "https://www.effectivegatecpm.com/yz4z5szmf?key=73186bcddd33133e4b3c585292f10bde",
+        "https://www.effectivegatecpm.com/cm2npj3b6n?key=bbdca23bff7d7d54853f830d7c238ddf",
+        "https://www.effectivegatecpm.com/s2mq62in?key=b17a7185381af8ce5baa404d8817d708",
+        "https://www.effectivegatecpm.com/uyz2avfp?key=af05da8c47fc0d441624224a14c722a6",
+        "https://www.effectivegatecpm.com/uz50mzu3f?key=efec633d14ae4a27a4a0aa1aa41c9c7e"
+    ];
+
+    function getRandomAd() {
+        return adLinks[Math.floor(Math.random() * adLinks.length)];
+    }
+
    const thumbnailsData = [
-   // 33 = The Marvels (2023)
-   { url: 'https://drive.google.com/file/d/1XPUQ4KJU8PLaP6HWjc1wb3u3fcMAoPdv/preview', title: 'The Marvels (2023) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/18BDEBDB3B792A8C41C6A2C392BA2E8EF5D576046CDE7B8C52F8F0707B351DEB/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
-   // 32 = Guardians of the Galaxy Vol. 3 (2023)
-   { url: 'https://drive.google.com/file/d/1hbCiNXWwzOpX0aSJha42ZbQ_YI6n27lP/preview', title: 'Guardians of the Galaxy Vol. 3 (2023) Full HD Movie', img: 'https://www.bu.edu/files/2023/05/guardians-of-the-galaxy-vol-three-feat.jpg' },
-   // 31 = Ant Man Quantumania (2023)
-   { url: 'https://drive.google.com/file/d/1GTxvcFVRJR1xc8AZ20v9DKID2wNrmNpR/preview', title: 'Ant_Man Quantumania (2023) Full HD Movie', img: 'https://prd-rteditorial.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/01/03154958/EWKA_Ant-Man_Quantumania2.jpg' },
-   // 30 = Black Panther: Wakanda Forever (2022)
-   { url: 'https://drive.google.com/file/d/1obQnFRJr9bhWt41-BTxv9aOzU5MFgeQD/preview', title: 'Black Panther: Wakanda Forever (2022) Full HD Movie', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReUUxtc5mU7oWREr17ZhCpC8INk0AJgCwGRQ&usqp=CAU' },
-   // 29 = Thor: Love and Thunder (2022)
-   { url: 'https://drive.google.com/file/d/1ib-7at7VSqpxC_ViNMZ-5DsH-lirpMIV/preview', title: 'Thor: Love and Thunder (2022) Full HD Movie', img: 'https://static0.srcdn.com/wordpress/wp-content/uploads/2022/07/Thor-love-and-thunder-cast-and-character-guide-christian-bale-gorr.jpg' },
-   // 28 = Doctor Strange (2022)
-   { url: 'https://drive.google.com/file/d/16UMgjfBwCQ4RMPBqlCUfqEvUGIXi8IDd/view', title: 'Doctor Strange in the Multiverse (2022) Full HD Movie', img: 'https://cdn.mos.cms.futurecdn.net/NJXQ8h3mUd9mhsh2m8xpba-1200-80.jpg' },
-   // 27 = Spider Man No Way Home (2021)
-   { url: 'https://drive.google.com/file/d/199dfFF7i_BFFMSAXg6dZbAdWld687UXb/preview', title: 'Spider-Man: No Way Home (2021) Full HD Movie', img: 'https://occ-0-8407-2219.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABRDQOzGC_rInp4gFvqFPDF3mcWchowjepe5uTldav_Sx1QgJlpJG-ATT_PcYJbF-y5AtlC9koSScBJPATb4JET65SrkrgOl92SGl.jpg?r=c9b' },
-   // 26 = Eternals (2021)
-   { url: 'https://drive.google.com/file/d/17K-spo6cjwwKbLywfX7xykSTIxXe5rYI/preview', title: 'Eternals (2021) Full HD Movie', img: 'https://m.media-amazon.com/images/M/MV5BYzFmZDQ3ZjAtYTQ2Ni00ZWY5LWI0OGQtNjlmZDhiNjRmYmFlXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg' },
-   // 25 = Shang-Chi (2021)
-   { url: 'https://drive.google.com/file/d/1NcNDaILDrehnAks1AlwvUdukxkU2y5l_/preview', title: 'Shang-Chi (2021) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/021F798CFDB648E344C3BA0C57AA0C6EE9EDD3D049AF92C3D4364970142124DA/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
-   // 24 = Black Widow (2021)
-   { url: 'https://drive.google.com/file/d/1P7UVDOMB1swh6jg8W8RsfjcQrM8HWI0o/preview', title: 'Black Widow (2021) Full HD Movie', img: 'https://cf-images.us-east-1.prod.boltdns.net/v1/static/5359769168001/68dcf50c-2bb6-451f-ba5d-60779e65b447/cb2e60a8-4c14-48db-a335-bc58419174d4/1280x720/match/image.jpg' },
-   // 23 = Spider Man For from home (2019)
-   { url: 'https://drive.google.com/file/d/133JAqM_6aMj5ElCzOhIVuTc4pFyHxSpR/preview', title: 'Spider-Man: Far From Home (2019) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/7791A92CA30EF9F51223B11EF62661ED67689005008D16B1876A97AE80964444/scale?width=1200&aspectRatio=1.78&format=webp' },
-   // 22 = Avenger Endgame (2019)
-   { url: 'https://drive.google.com/file/d/1Ohk-eA7GimhAeSZSwf7ZJZE1iyL4TtoE/preview', title: 'Avengers: Endgame (2019) Full HD Movie', img: 'https://i.dawn.com/primary/2019/04/5cc6a29a812e0.jpg' },
-   // 21 = Caiptan Marvel (2019)
-   { url: 'https://drive.google.com/file/d/1wjK9Jga0YQy4cVMJdamdf7_iUmMMthZy/preview', title: 'Captain Marvel (2019) Full HD Movie', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9IMmpRxTa1bLlDyKx5ZHmSu9hlnU6pEmDhg&usqp=CAU' },
-   // 20 = Ant Man 2 (2018)
-   { url: 'https://drive.google.com/file/d/1qDOdIAgYU0IaeAdwy74AEmBbl_WM6w8u/preview', title: 'Ant-Man and the Wasp (2018) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/770770DF72E3203872EA4400CF85F72B17CE976E41518B73BC88718E2596C56D/scale?width=1200&aspectRatio=1.78&format=webp' },
-   // 19 = Avenger infinity war (2018)
-   { url: 'https://drive.google.com/file/d/1bV-zC2BkZmKcJeFHTZw14c4jvgPJDFhP/preview', title: 'Avengers: Infinity War (2018) Full HD Movie', img: 'https://hips.hearstapps.com/digitalspyuk.cdnds.net/18/14/1522924460-avengers-infinity-war-poster.jpg' },
-   // 18 = Black Panther (2018)
-   { url: 'https://drive.google.com/file/d/1RkEbS4bmrMc94kcq_PmlFh7nM79mlMmx/preview', title: 'Black Panther (2018) Full HD Movie', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3dHTNn6_i7xRSga_pNbF_MXwjBB39BR1Bew&usqp=CAU' },
-   // 17 = Thor 3 (2017)
-   { url: 'https://drive.google.com/file/d/1JvJTi1Gs3XtngUdmPp-jY7yMNrbWlcZs/preview', title: 'Thor: Ragnarok (2017) Full HD Movie', img: 'https://www.pluggedin.com/wp-content/uploads/2019/12/Thor__Ragnarok__Large.jpg-1200x688.jpeg' },
-   // 16 = Spider Man Homecomming (2017)
-   { url: 'https://drive.google.com/file/d/16xF_f7NYnxdxbbbhjo2jz3CH04ut77XM/preview', title: 'Spider-Man: Homecoming (2017) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/BC43084FDE2395898283560F553EA284E5D9A65A3062564F9286891E0FD84F41/scale?width=1200&aspectRatio=1.78&format=webp' },
-   // 15 = Guardians Glaxy 2 (2017)
-   { url: 'https://drive.google.com/file/d/1gfuzo0FFi-lpmAbYIF5cC6HFJ8bmfOTQ/preview', title: 'Guardians of the Galaxy Vol. 2 (2017) Full HD Movie', img: 'https://i.ibb.co/dk8W3FQ/85b8a91c-a701-4c1b-8d12-d325399483d9.jpg' },
-   // 14 = Doctor Strange (2016)
-   { url: 'https://drive.google.com/file/d/1wwrl2BAShqDDtkIRByZhWcbOCFRfNJj6/preview', title: 'Doctor Strange (2016) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/1AED6998C4DB33CBF49EE2C76FEB6FB4062CA732F1A58D861D4D05D2E876D8C6/scale?width=1200&aspectRatio=1.78&format=webp' },
-   // 13 = Captain Amreca civil war (2016)
-   { url: 'https://drive.google.com/file/d/1TB-F9nFyoL8xPYFcREbk46on32DNJodC/preview', title: 'Captain America: Civil War (2016) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/DBE4C13505BC8C2B8C53B1F52C3D15B0E929172D54FAF97F70F4C4C0815AD83E/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
-   // 12 = Ant man_1 (2015)
-   { url: 'https://drive.google.com/file/d/1n4eqGo9QDbDHnqEk1EU4WSFw0Y-A-dkn/preview', title: 'Ant_Man 1(2015) Full HD Movie', img: 'https://cdn.marvel.com/content/1x/antman_lob_mas_hlf_01.jpg' },
-   // 11 = Avenger Ultrone (2015)
-   { url: 'https://drive.google.com/file/d/1XxglnXi20LLKfBKRjypP0o5kvaChJbXL/preview', title: 'Avengers Age of ultron (2015) Full HD Movie', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaeiW7IxBI3hs5c8DsdTWKiod9DSP2IcvvlQ&usqp=CAU' },
-   // 10 = Guardians Of Glaxy_1 (2014)
-   { url: 'https://drive.google.com/file/d/1lOxYQCMQjq6N3dc_g94XGDU3C6E-xCqH/preview', title: 'Guardians Of The Galaxy 1 (2014) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/C1C0181ED7342217394E5AC940003A8653E3311B6016194749B29A0FE3F238EB/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
-   // 9 = Caiptan America_2 winter Soldier (2014)
-   { url: 'https://drive.google.com/file/d/1Inu2LewaEseorCkvJiwKcPSYszcDDMCB/preview', title: 'Captain America The Winter Soldier (2014) Full HD Movie', img: 'https://i.ytimg.com/vi/7SlILk2WMTI/maxresdefault.jpg' },
-   // 8 = Thor_2 Dark world (2013)
-   { url: 'https://drive.google.com/file/d/1s63TMyTCYomfBVGnzHiFNXLZr3_hGoKB/preview', title: 'Thor The Dark World (2013) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/C715AAC16E03C381156F7C5253D40B2CF1C9C8D7F5CEC7BAE621A1DF7305631E/scale?width=1200&aspectRatio=1.78&format=webp' },
-   // 7  = Iron Man_3 (2013)
-   { url: 'https://drive.google.com/file/d/1VS1Qnf4RC_OccSUSjkncWcBkwoNdBR0U/preview', title: 'iron Man 3 (2013) Full HD Movie', img: 'https://www.indiewire.com/wp-content/uploads/2013/04/iron-man-3-poster-header.jpg' },
-   // 6 = The Avengers (2012)
-   { url: 'https://drive.google.com/file/d/1YeHjT605E87838iC-_4IiIemuz1VpR9P/preview', title: 'The Avenger (2012) Full HD Movie', img: 'https://www.pluggedin.com/wp-content/uploads/2019/12/the-avengers-review-image-1200x688.jpg' },
-   // 5 = Captain Amireca_1 (2011)
-   { url: 'https://drive.google.com/file/d/1eAKmQFVMg8-AxYXu3dU1foc178--elQg/preview', title: 'Captain America The First Avenger (2011) Full HD Movie', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/48A5318F985B17F3840FD824F28ACE4C5FF99B4A5C938577D9159EF4BD076EBC/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
-   // 4 = Thor_1 (2011)
-   { url: 'https://drive.google.com/file/d/1JJk9pwjxsWX6RKiYzjRZBMbZ1qew2XhT/preview', title: 'Thor One (2011) Full HD Movie', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSLCh5_yDbkXDM47vYhgKa8Z_BrREqD-8qcLxCQWkHTg_-lD-Fus18yUI&s=10' },
-   // 3 =
-   { url: 'https://drive.google.com/file/d/1UYZHUWf5IMdwcrJVizN4Xa5FaSoYVtc3/preview', title: 'Iron Man 2 (2010) Full HD Movie', img: 'https://miro.medium.com/v2/resize:fit:640/1*a7wIBOE3DKQeBQN4YuG78g.jpeg' }, 
-   // 2 = Hulk (2008)
-   { url: 'https://drive.google.com/file/d/1zgdUw4s1tMciRQbWDsKp8Va6rEOyccA6/preview', title: 'The Incredible Hulk (2008) Full HD Movie', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw2JgpYmQAK64-GuYWFqC2k-_YeeIIhi5meQ&usqp=CAU' },
-   // 1 = iron man 1 (2008)
-   { url: 'https://drive.google.com/file/d/14xmjwafod7uje2oDlqJWKz-BCtBEL5un/preview', title: 'Iron Man 1 (2008) Full HD Movie', img: 'https://i.ytimg.com/vi/OzNSte9Crso/maxresdefault.jpg' },
-   
+   // Example for Direct Link (R2, MP4 etc)
+     { url: 'https://pub-6b25c191839c4b01a878de4fdde0227b.r2.dev/62208418fb0b090e07052b27d3156a2f?token=1766200473114', title: 'The Fantastic Four: First Steps (2025)', img: 'https://m.media-amazon.com/images/M/MV5BM2UxMzM4ZjAtMzQ4Mi00MTg0LWJjM2UtMjdlZjcyNzFlYWMxXkEyXkFqcGc@._V1_QL75_UX500_CR0,13,500,281_.jpg'},
+     { url: 'https://fsl.master.surf/06f35ba60e56c94968d24ceff08ca92a?token=1766200416113', title: 'Thunderbolts (2025)', img: 'https://m.media-amazon.com/images/M/MV5BMDAyYjA5OTktMzljOC00YTNhLWE4MDYtYjdiMDhlMTJhOTFkXkEyXkFqcGdeQXZ3ZXNsZXk@._V1_.jpg'},
+   { url: 'https://fsl.master.surf/fac16d65113414f9faf933ba4fe14be6?token=1766200207', title: 'Captain America: Brave New World (2025)', img: 'https://m.media-amazon.com/images/M/MV5BYjdmOTRhMTctYmE2Ni00MDEwLThjMjUtOTAwNTI0Y2JmNGVkXkEyXkFqcGdeQXZ3ZXNsZXk@._V1_.jpg'},
+   { url: 'https://pub-b5ecaffddf2344a0ae2222f5e8913e1b.r2.dev/Deadpool.&.Wolverine.2024.720p.HEVC.BluRay.Hindi.5.1-English.ESub.x265-HDHub4u.Tv.mkv?token=1766198447140', title: 'Deadpool and Wolverine (2024)', img: 'https://m.media-amazon.com/images/M/MV5BOTcxNzNmMzItYTk0ZC00YmM4LThhYTQtOTFhYzE4YjNkODhmXkEyXkFqcGdeQWpnYW1i._V1_.jpg'},
+   { url: 'https://drive.google.com/file/d/1XPUQ4KJU8PLaP6HWjc1wb3u3fcMAoPdv/preview', title: 'The Marvels (2023)', img: 'https://m.media-amazon.com/images/M/MV5BMjcyNDNhMTYtZDExNC00MjY2LThhN2QtNjQ3ZWFmMGFkYWI0XkEyXkFqcGc@._V1_.jpg' },
+   { url: 'https://drive.google.com/file/d/1hbCiNXWwzOpX0aSJha42ZbQ_YI6n27lP/preview', title: 'Guardians of the Galaxy Vol. 3 (2023)', img: 'https://m.media-amazon.com/images/M/MV5BMWVhN2NjOTgtMDZlYS00YmYwLTliY2EtZjNkMzIwZTc5NDJhXkEyXkFqcGdeQVRoaXJkUGFydHlJbmdlc3Rpb25Xb3JrZmxvdw@@._V1_.jpg' },
+   { url: 'https://drive.google.com/file/d/1GTxvcFVRJR1xc8AZ20v9DKID2wNrmNpR/preview', title: 'Ant-Man: Quantumania (2023)', img: 'https://m.media-amazon.com/images/M/MV5BZDQ1OWU3N2MtMjI1OS00YWQ5LTlkN2UtYmVmYjg1OTY4YzNmXkEyXkFqcGdeQWpnYW1i._V1_.jpg' },
+   { url: 'https://drive.google.com/file/d/1obQnFRJr9bhWt41-BTxv9aOzU5MFgeQD/preview', title: 'Black Panther: Wakanda Forever (2022)', img: 'https://m.media-amazon.com/images/M/MV5BN2Q5YzlmNWMtNzRlZC00NGZjLThkMTItNTI1ZGY1MjlmMjk2XkEyXkFqcGdeQWFybm8@._V1_.jpg' },
+   { url: 'https://drive.google.com/file/d/1ib-7at7VSqpxC_ViNMZ-5DsH-lirpMIV/preview', title: 'Thor: Love and Thunder (2022)', img: 'https://static0.srcdn.com/wordpress/wp-content/uploads/2022/07/Thor-love-and-thunder-cast-and-character-guide-christian-bale-gorr.jpg' },
+   { url: 'https://drive.google.com/file/d/16UMgjfBwCQ4RMPBqlCUfqEvUGIXi8IDd/preview', title: 'Doctor Strange: Multiverse (2022)', img: 'https://cdn.mos.cms.futurecdn.net/NJXQ8h3mUd9mhsh2m8xpba-1200-80.jpg' },
+   { url: 'https://drive.google.com/file/d/199dfFF7i_BFFMSAXg6dZbAdWld687UXb/preview', title: 'Spider-Man: No Way Home (2021)', img: 'https://occ-0-8407-2219.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABRDQOzGC_rInp4gFvqFPDF3mcWchowjepe5uTldav_Sx1QgJlpJG-ATT_PcYJbF-y5AtlC9koSScBJPATb4JET65SrkrgOl92SGl.jpg?r=c9b' },
+   { url: 'https://drive.google.com/file/d/17K-spo6cjwwKbLywfX7xykSTIxXe5rYI/preview', title: 'Eternals (2021)', img: 'https://m.media-amazon.com/images/M/MV5BNDMzZTRkYWQtZDMwMS00ZWRhLWI5NjAtMDNiNzM1NzI4OTJlXkEyXkFqcGc@._V1_.jpg' },
+   { url: 'https://drive.google.com/file/d/1NcNDaILDrehnAks1AlwvUdukxkU2y5l_/preview', title: 'Shang-Chi (2021)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/021F798CFDB648E344C3BA0C57AA0C6EE9EDD3D049AF92C3D4364970142124DA/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
+   { url: 'https://drive.google.com/file/d/1P7UVDOMB1swh6jg8W8RsfjcQrM8HWI0o/preview', title: 'Black Widow (2021)', img: 'https://cf-images.us-east-1.prod.boltdns.net/v1/static/5359769168001/68dcf50c-2bb6-451f-ba5d-60779e65b447/cb2e60a8-4c14-48db-a335-bc58419174d4/1280x720/match/image.jpg' },
+   { url: 'https://drive.google.com/file/d/133JAqM_6aMj5ElCzOhIVuTc4pFyHxSpR/preview', title: 'Spider-Man: Far From Home (2019)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/7791A92CA30EF9F51223B11EF62661ED67689005008D16B1876A97AE80964444/scale?width=1200&aspectRatio=1.78&format=webp' },
+   { url: 'https://drive.google.com/file/d/1Ohk-eA7GimhAeSZSwf7ZJZE1iyL4TtoE/preview', title: 'Avengers: Endgame (2019)', img: 'https://i.dawn.com/primary/2019/04/5cc6a29a812e0.jpg' },
+   { url: 'https://drive.google.com/file/d/1wjK9Jga0YQy4cVMJdamdf7_iUmMMthZy/preview', title: 'Captain Marvel (2019)', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9IMmpRxTa1bLlDyKx5ZHmSu9hlnU6pEmDhg&usqp=CAU' },
+   { url: 'https://drive.google.com/file/d/1qDOdIAgYU0IaeAdwy74AEmBbl_WM6w8u/preview', title: 'Ant-Man and the Wasp (2018)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/770770DF72E3203872EA4400CF85F72B17CE976E41518B73BC88718E2596C56D/scale?width=1200&aspectRatio=1.78&format=webp' },
+   { url: 'https://drive.google.com/file/d/1bV-zC2BkZmKcJeFHTZw14c4jvgPJDFhP/preview', title: 'Avengers: Infinity War (2018)', img: 'https://hips.hearstapps.com/digitalspyuk.cdnds.net/18/14/1522924460-avengers-infinity-war-poster.jpg' },
+   { url: 'https://drive.google.com/file/d/1RkEbS4bmrMc94kcq_PmlFh7nM79mlMmx/preview', title: 'Black Panther (2018)', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3dHTNn6_i7xRSga_pNbF_MXwjBB39BR1Bew&usqp=CAU' },
+   { url: 'https://drive.google.com/file/d/1JvJTi1Gs3XtngUdmPp-jY7yMNrbWlcZs/preview', title: 'Thor: Ragnarok (2017)', img: 'https://www.pluggedin.com/wp-content/uploads/2019/12/Thor__Ragnarok__Large.jpg-1200x688.jpeg' },
+   { url: 'https://drive.google.com/file/d/16xF_f7NYnxdxbbbhjo2jz3CH04ut77XM/preview', title: 'Spider-Man: Homecoming (2017)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/BC43084FDE2395898283560F553EA284E5D9A65A3062564F9286891E0FD84F41/scale?width=1200&aspectRatio=1.78&format=webp' },
+   { url: 'https://drive.google.com/file/d/1gfuzo0FFi-lpmAbYIF5cC6HFJ8bmfOTQ/preview', title: 'Guardians of the Galaxy Vol. 2 (2017)', img: 'https://i.ibb.co/dk8W3FQ/85b8a91c-a701-4c1b-8d12-d325399483d9.jpg' },
+   { url: 'https://drive.google.com/file/d/1wwrl2BAShqDDtkIRByZhWcbOCFRfNJj6/preview', title: 'Doctor Strange (2016)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/1AED6998C4DB33CBF49EE2C76FEB6FB4062CA732F1A58D861D4D05D2E876D8C6/scale?width=1200&aspectRatio=1.78&format=webp' },
+   { url: 'https://drive.google.com/file/d/1TB-F9nFyoL8xPYFcREbk46on32DNJodC/preview', title: 'Captain America: Civil War (2016)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/DBE4C13505BC8C2B8C53B1F52C3D15B0E929172D54FAF97F70F4C4C0815AD83E/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
+   { url: 'https://drive.google.com/file/d/1n4eqGo9QDbDHnqEk1EU4WSFw0Y-A-dkn/preview', title: 'Ant-Man (2015)', img: 'https://cdn.marvel.com/content/1x/antman_lob_mas_hlf_01.jpg' },
+   { url: 'https://drive.google.com/file/d/1XxglnXi20LLKfBKRjypP0o5kvaChJbXL/preview', title: 'Avengers: Age of Ultron (2015)', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaeiW7IxBI3hs5c8DsdTWKiod9DSP2IcvvlQ&usqp=CAU' },
+   { url: 'https://drive.google.com/file/d/1lOxYQCMQjq6N3dc_g94XGDU3C6E-xCqH/preview', title: 'Guardians of the Galaxy (2014)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/C1C0181ED7342217394E5AC940003A8653E3311B6016194749B29A0FE3F238EB/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
+   { url: 'https://drive.google.com/file/d/1Inu2LewaEseorCkvJiwKcPSYszcDDMCB/preview', title: 'Captain America: Winter Soldier (2014)', img: 'https://i.ytimg.com/vi/7SlILk2WMTI/maxresdefault.jpg' },
+   { url: 'https://drive.google.com/file/d/1s63TMyTCYomfBVGnzHiFNXLZr3_hGoKB/preview', title: 'Thor: The Dark World (2013)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/C715AAC16E03C381156F7C5253D40B2CF1C9C8D7F5CEC7BAE621A1DF7305631E/scale?width=1200&aspectRatio=1.78&format=webp' },
+   { url: 'https://drive.google.com/file/d/1VS1Qnf4RC_OccSUSjkncWcBkwoNdBR0U/preview', title: 'Iron Man 3 (2013)', img: 'https://www.indiewire.com/wp-content/uploads/2013/04/iron-man-3-poster-header.jpg' },
+   { url: 'https://drive.google.com/file/d/1YeHjT605E87838iC-_4IiIemuz1VpR9P/preview', title: 'The Avengers (2012)', img: 'https://www.pluggedin.com/wp-content/uploads/2019/12/the-avengers-review-image-1200x688.jpg' },
+   { url: 'https://drive.google.com/file/d/1eAKmQFVMg8-AxYXu3dU1foc178--elQg/preview', title: 'Captain America: First Avenger (2011)', img: 'https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/48A5318F985B17F3840FD824F28ACE4C5FF99B4A5C938577D9159EF4BD076EBC/scale?width=1200&amp;aspectRatio=1.78&amp;format=webp' },
+   { url: 'https://drive.google.com/file/d/1JJk9pwjxsWX6RKiYzjRZBMbZ1qew2XhT/preview', title: 'Thor (2011)', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSLCh5_yDbkXDM47vYhgKa8Z_BrREqD-8qcLxCQWkHTg_-lD-Fus18yUI&s=10' },
+   { url: 'https://drive.google.com/file/d/1UYZHUWf5IMdwcrJVizN4Xa5FaSoYVtc3/preview', title: 'Iron Man 2 (2010)', img: 'https://miro.medium.com/v2/resize:fit:640/1*a7wIBOE3DKQeBQN4YuG78g.jpeg' },
+   { url: 'https://drive.google.com/file/d/1zgdUw4s1tMciRQbWDsKp8Va6rEOyccA6/preview', title: 'The Incredible Hulk (2008)', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw2JgpYmQAK64-GuYWFqC2k-_YeeIIhi5meQ&usqp=CAU' },
+   { url: 'https://drive.google.com/file/d/14xmjwafod7uje2oDlqJWKz-BCtBEL5un/preview', title: 'Iron Man (2008)', img: 'https://i.ytimg.com/vi/OzNSte9Crso/maxresdefault.jpg' }
    ];
 
-    const thumbnailsPerPage = 11;
+    const thumbnailsPerPage = 12;
     let currentPage = 1;
 
     function displayThumbnails() {
@@ -333,15 +302,13 @@
             const div = document.createElement('div');
             div.className = 'thumbnail';
             div.onclick = () => playVideo(thumbnail.url, thumbnail.title);
-            const viewCount = getViewCount(thumbnail.url);
+            
             div.innerHTML = `
-<span class="movie-number">Movie ${thumbnailsData.length - (start + index)}</span>
-               
-                <img src="${thumbnail.img}" alt="${thumbnail.title}">
-                <p>${thumbnail.title}</p>
-        
-                <div class="download-link">
-                    <a href="#" onclick="event.stopPropagation(); openIFrame();">Download</a>
+                <span class="movie-number">#${thumbnailsData.length - (start + index)}</span>
+                <img src="${thumbnail.img}" alt="${thumbnail.title}" loading="lazy">
+                <div class="thumbnail-info">
+                    <p style="font-size: 13px; height: 35px;">${thumbnail.title}</p>
+                    <a href="javascript:void(0)" class="download-btn" onclick="event.stopPropagation(); openOverlay();">Download</a>
                 </div>
             `;
             container.appendChild(div);
@@ -354,59 +321,72 @@
     function changePage(direction) {
         currentPage += direction;
         displayThumbnails();
+        window.scrollTo({top: document.querySelector('.thumbnails').offsetTop - 150, behavior: 'smooth'});
     }
 
     function playVideo(url, title) {
-        const player = document.getElementById('mainPlayer');
+        const iframePlayer = document.getElementById('mainPlayer');
+        const videoPlayer = document.getElementById('directVideoPlayer');
+        const videoSource = document.getElementById('videoSource');
         const loading = document.getElementById('loading');
-        player.src = '';
+
+        // دونوں پلیئرز کو صاف اور چھپا دیں
+        iframePlayer.style.display = 'none';
+        videoPlayer.style.display = 'none';
+        iframePlayer.src = '';
+        videoPlayer.pause();
+
         loading.style.display = 'block';
 
-        incrementViewCount(url);
-
         setTimeout(() => {
-            player.src = url;
             loading.style.display = 'none';
             document.getElementById('videoTitle').textContent = title;
-        }, 300);
+
+            // اسمارٹ چیک: کیا یہ ڈائریکٹ لنک ہے؟ (mp4, mkv, r2.dev یا ٹوکن والے لنکس)
+            if (url.includes('.mp4') || url.includes('.mkv') || url.includes('r2.dev') || url.includes('token=')) {
+                videoSource.src = url;
+                videoPlayer.load();
+                videoPlayer.style.display = 'block';
+                videoPlayer.play();
+            } else {
+                // گوگل ڈرائیو یا آئی فریم والے لنکس
+                iframePlayer.src = url;
+                iframePlayer.style.display = 'block';
+            }
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }, 600);
     }
 
-    displayThumbnails();
+    function openOverlay() {
+        const overlay = document.getElementById('overlay');
+        const timerDisplay = document.getElementById('timer');
+        const iframe = document.getElementById('overlayIframe');
+        let timeLeft = 20;
 
-    function incrementViewCount(url) {
-        let viewCounts = JSON.parse(localStorage.getItem('viewCounts') || '{}');
-        viewCounts[url] = (viewCounts[url] || 0) + 1;
-        localStorage.setItem('viewCounts', JSON.stringify(viewCounts));
+        iframe.src = getRandomAd();
+        overlay.style.display = 'flex';
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = ` ${timeLeft}`;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                closeOverlay();
+            }
+        }, 1000);
     }
 
-    function getViewCount(url) {
-        let viewCounts = JSON.parse(localStorage.getItem('viewCounts') || '{}');
-        return viewCounts[url] || 0;
+    function closeOverlay() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('overlayIframe').src = '';
     }
 
-// Function to open the overlay with a specific link
-function openOverlay(url) {
-    document.getElementById('overlayIframe').src = url;
-    document.getElementById('overlay').style.display = 'flex';
-    // Show the close button after 10 seconds
-    setTimeout(() => {
-        document.querySelector('.close-btn').style.display = 'block';
-        document.querySelector('.close-btn').style.animation = 'showButton 1s forwards'; // Adjust animation timing if needed
-    }, 10000); // 5 seconds delay
-}
-
-// Function to close the overlay
-function closeOverlay() {
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('overlayIframe').src = ''; // Stop the video
-}
-
-// Automatically open the overlay with a specific URL when the page loads
-window.onload = function() {
-    setTimeout(() => {
-        openOverlay('https://www.highratecpm.com/uyz2avfp?key=af05da8c47fc0d441624224a14c722a6'); // Replace with your URL
-    }, 1000); // Adjust delay as needed
-};
+    window.onload = function() {
+        displayThumbnails();
+        setTimeout(() => {
+            openOverlay();
+        }, 1500);
+    };
     
 </script>
 <script type='text/javascript' src='//pl23971147.highratecpm.com/44/b4/d5/44b4d574a1d80f33a4e7c99ba0ac3369.js'></script>
